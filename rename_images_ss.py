@@ -34,8 +34,8 @@ def rename_product_images():
     screenshot_count = 0
     
     for filename in image_files:
-        # ใช้ regex เพื่อหารหัสสินค้า (xx-xxxxxx)
-        match = re.search(r'(\d{2}-\d{6})', filename)
+        # แก้ไข regex pattern ให้รองรับเลขหน้า 2-3 หลัก
+        match = re.search(r'(\d{2,3}-\d{6})', filename)
         
         if match:
             product_code = match.group(1)

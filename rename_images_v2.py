@@ -17,8 +17,9 @@ def rename_product_images():
     # รวบรวมไฟล์ทั้งหมดในโฟลเดอร์
     files = os.listdir(folder_path)
     
-    # กรองเฉพาะไฟล์รูปภาพ
-    image_files = [f for f in files if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+    # กรองเฉพาะไฟล์รูปภาพ (รองรับทั้งตัวพิมพ์เล็กและใหญ่)
+    image_extensions = ('.jpg', '.jpeg', '.png', '.JPG', '.JPEG', '.PNG')
+    image_files = [f for f in files if f.endswith(image_extensions)]
     
     if not image_files:
         print("\nไม่พบไฟล์รูปภาพในโฟลเดอร์")
@@ -31,10 +32,16 @@ def rename_product_images():
     # สร้างดิกชันนารีเพื่อเก็บจำนวนไฟล์ของแต่ละรหัสสินค้า
     product_count = {}
     success_count = 0
+    failed_files = []  # เก็บรายการไฟล์ที่มีปัญหา
     
     for filename in image_files:
-        # ใช้ regex เพื่อหารหัสสินค้า (xx-xxxxxx)
-        match = re.search(r'(\d{2}-\d{6})', filename)
+        # ตัดส่วนที่อยู่หลังจุดแรกออก (ยกเว้นนามสกุลไฟล์)
+        base_name = filename
+        if '.' in filename[:-4]:  # ตรวจสอบว่ามีจุดก่อนนามสกุลไฟล์หรือไม่
+            base_name = filename.split('.')[0]  # เอาเฉพาะส่วนก่อนจุดแรก
+        
+        # ใช้ regex เพื่อหารหัสสินค้า (xx-xxxxxx) จากชื่อที่ตัดแล้ว
+        match = re.search(r'(\d{2,3}-\d{5,6})', base_name)
         
         if match:
             product_code = match.group(1)
@@ -56,11 +63,27 @@ def rename_product_images():
                 print(f"✓ เปลี่ยนชื่อ: {filename} -> {new_name}")
                 success_count += 1
             except Exception as e:
-                print(f"✗ เกิดข้อผิดพลาด {filename}: {str(e)}")
+                error_msg = f"✗ เกิดข้อผิดพลาด {filename}: {str(e)}"
+                print(error_msg)
+                failed_files.append((filename, "ไม่สามารถเปลี่ยนชื่อได้", str(e)))
         else:
-            print(f"✗ ไม่พบรหัสสินค้าในชื่อไฟล์: {filename}")
+            error_msg = f"✗ ไม่พบรหัสสินค้า (xx-xxxxxx) ในชื่อไฟล์: {filename}"
+            print(error_msg)
+            failed_files.append((filename, "ไม่พบรหัสสินค้า", "-"))
     
     print(f"\nเสร็จสิ้น! เปลี่ยนชื่อสำเร็จ {success_count} ไฟล์ จากทั้งหมด {len(image_files)} ไฟล์")
+    
+    # แสดงรายการไฟล์ที่มีปัญหาทั้งหมด
+    if failed_files:
+        print("\nรายการไฟล์ที่ไม่สามารถเปลี่ยนชื่อได้:")
+        print("-" * 80)
+        for file, reason, error in failed_files:
+            print(f"ไฟล์: {file}")
+            print(f"สาเหตุ: {reason}")
+            if error != "-":
+                print(f"ข้อผิดพลาด: {error}")
+            print("-" * 80)
+    
     input("\nกด Enter เพื่อปิดโปรแกรม...")
 
 # เรียกใช้งานฟังก์ชัน
