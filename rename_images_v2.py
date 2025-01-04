@@ -40,11 +40,11 @@ def rename_product_images():
         if '.' in filename[:-4]:  # ตรวจสอบว่ามีจุดก่อนนามสกุลไฟล์หรือไม่
             base_name = filename.split('.')[0]  # เอาเฉพาะส่วนก่อนจุดแรก
         
-        # ใช้ regex เพื่อหารหัสสินค้า (xx-xxxxxx) จากชื่อที่ตัดแล้ว
-        match = re.search(r'(\d{2,3}-\d{5,6})', base_name)
+        # ใช้ regex เพื่อหารหัสสินค้า (รองรับทลายรูปแบบ)
+        match = re.search(r'@?(\d{6}-\d{4}|\d{2,3}-\d{5,6})', base_name)
         
         if match:
-            product_code = match.group(1)
+            product_code = match.group(1)  # ใช้ group(1) เพื่อเอาเฉพาะตัวเลข
             
             # นับจำนวนไฟล์ของแต่ละรหัสสินค้า
             if product_code in product_count:
