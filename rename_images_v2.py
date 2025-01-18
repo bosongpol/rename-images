@@ -89,3 +89,4 @@ def rename_product_images():
 # เรียกใช้งานฟังก์ชัน
 if __name__ == "__main__":
     rename_product_images()
+
